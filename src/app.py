@@ -38,7 +38,43 @@ activities = {
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
-    }
+     },
+   "Basketball Team": {
+      "description": "Competitive basketball training and games",
+      "schedule": "Tuesdays and Thursdays, 4:00 PM - 6:00 PM",
+      "max_participants": 15,
+      "participants": []
+   },
+   "Swimming Club": {
+      "description": "Swimming training and water sports",
+      "schedule": "Mondays and Wednesdays, 3:30 PM - 5:00 PM",
+      "max_participants": 20,
+      "participants": []
+   },
+   "Art Studio": {
+      "description": "Express creativity through painting and drawing",
+      "schedule": "Wednesdays, 3:30 PM - 5:00 PM",
+      "max_participants": 15,
+      "participants": []
+   },
+   "Drama Club": {
+      "description": "Theater arts and performance training",
+      "schedule": "Tuesdays, 4:00 PM - 6:00 PM",
+      "max_participants": 25,
+      "participants": []
+   },
+   "Debate Team": {
+      "description": "Learn public speaking and argumentation skills",
+      "schedule": "Thursdays, 3:30 PM - 5:00 PM",
+      "max_participants": 16,
+      "participants": []
+   },
+   "Science Club": {
+      "description": "Hands-on experiments and scientific exploration",
+      "schedule": "Fridays, 3:30 PM - 5:00 PM",
+      "max_participants": 20,
+      "participants": []
+   }
 }
 
 
@@ -50,6 +86,7 @@ def root():
 @app.get("/activities")
 def get_activities():
     return activities
+
 
 
 @app.post("/activities/{activity_name}/signup")
@@ -64,4 +101,22 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+
+    # Validate student is not already signed up
+    if activity["participants"].count(email) > 1:
+        raise HTTPException(status_code=400, detail="Student already signed up for this activity")
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+# Unregister endpoint
+@app.post("/activities/{activity_name}/unregister")
+def unregister_from_activity(activity_name: str, email: str):
+    """Remove a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    activity = activities[activity_name]
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=404, detail="Participant not found in this activity")
+    activity["participants"].remove(email)
+    return {"message": f"Unregistered {email} from {activity_name}"}
+
